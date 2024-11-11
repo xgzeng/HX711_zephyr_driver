@@ -363,7 +363,11 @@ static int hx711_channel_get(const struct device *dev, enum sensor_channel chan,
 
 	switch (hx711_chan) {
 	case HX711_SENSOR_CHAN_WEIGHT: {
+#if CONFIG_HX711_SLOPE_INVERTED
+        double value = (data->reading - data->offset) / sensor_value_to_double(&data->slope);
+#else
         double value = sensor_value_to_double(&data->slope) * (data->reading - data->offset);
+#endif
         sensor_value_from_double(val, value);
 		return 0;
 	}
@@ -556,7 +560,11 @@ struct sensor_value avia_hx711_calibrate(const struct device *dev, uint32_t targ
 	avg = avg / readings;
 
 	LOG_DBG("Average after division : %d", avg);
+#if CONFIG_HX711_SLOPE_INVERTED
+    double slope = (double)(avg - data->offset) / target;
+#else
 	double slope = (double)target / (double)(avg - data->offset);
+#endif
 	sensor_value_from_double(&data->slope, slope);
 
 	LOG_DBG("Slope set to : %d.%06d", data->slope.val1, data->slope.val2);

@@ -17,6 +17,14 @@ config HX711_OFFSET
 	help
 	  Sensor offset.
 
+config HX711_SLOPE_INVERTED
+    bool "Inverted slope"
+    default n
+    help
+      Sensor slope is calulated as (reading - offset) / weight.
+      Slope means reading difference per weight unit.
+      So weight = (reading - offset) / slope.
+
 config HX711_SLOPE_INTEGER
 	int "Initial Slope. Integer part."
 	default 1
