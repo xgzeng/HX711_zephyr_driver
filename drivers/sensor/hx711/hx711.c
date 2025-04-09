@@ -339,6 +339,32 @@ static int hx711_attr_set(const struct device *dev, enum sensor_channel chan,
 	}
 }
 
+static int hx711_attr_get(const struct device *dev, enum sensor_channel chan,
+            enum sensor_attribute attr, struct sensor_value *val) {
+    int hx711_attr = (int)attr;
+    struct hx711_data *data = dev->data;
+
+    switch (hx711_attr) {
+    #if DT_INST_NODE_HAS_PROP(0, rate_gpios)
+        case SENSOR_ATTR_SAMPLING_FREQUENCY:
+        *val = data->rate;
+        break;
+    #endif
+    case SENSOR_ATTR_OFFSET:
+        val->val1 = data->offset;
+        break;
+    case HX711_SENSOR_ATTR_SLOPE:
+        *val = data->slope;
+        break;
+    case HX711_SENSOR_ATTR_GAIN:
+        val->val1 = data->gain;
+        break;
+    default:
+        return -ENOTSUP;
+    }
+    return 0;
+}
+
 /**
  * @brief Get HX711 reading.
  *
@@ -635,6 +661,7 @@ static const struct sensor_driver_api hx711_api = {
 	.sample_fetch = hx711_sample_fetch,
 	.channel_get = hx711_channel_get,
 	.attr_set = hx711_attr_set,
+    .attr_get = hx711_attr_get,
 };
 
 PM_DEVICE_DT_DEFINE(DT_DRV_INST(0), hx711_pm_ctrl);
